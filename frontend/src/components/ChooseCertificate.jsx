@@ -1,25 +1,42 @@
-
+/* eslint-disable react/prop-types */
 import { CiSearch } from "react-icons/ci";
-import certificate from "../assets/images/Certificate.png"
+import certificate from "../assets/images/Certificate.png";
 import { RiArrowDownSFill } from "react-icons/ri";
 import { IoIosArrowDown } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
 
-
-function ChooseCertificate() {
-  const navigate = useNavigate();
+function ChooseCertificate({ setSelectedCertificate }) {
   const certificateData = [
-    { image: certificate, title: "Certificate Details A", date:"15 July 2024"},
-    { image: certificate, title: "Certificate Details B", date:"15 July 2024"},
-    { image: certificate, title: "Certificate Details C", date:"15 July 2024"},
-    { image: certificate, title: "Certificate Details D", date:"15 July 2024"},
-    { image: certificate, title: "Certificate Details E", date:"15 July 2024"},
-    { image: certificate, title: "Certificate Details F", date:"15 July 2024"},
+    {
+      image: certificate,
+      title: "Certificate Details A",
+      date: "15 July 2024",
+    },
+    {
+      image: certificate,
+      title: "Certificate Details B",
+      date: "15 July 2024",
+    },
+    {
+      image: certificate,
+      title: "Certificate Details C",
+      date: "15 July 2024",
+    },
+    {
+      image: certificate,
+      title: "Certificate Details D",
+      date: "15 July 2024",
+    },
+    {
+      image: certificate,
+      title: "Certificate Details E",
+      date: "15 July 2024",
+    },
+    {
+      image: certificate,
+      title: "Certificate Details F",
+      date: "15 July 2024",
+    },
   ];
-
-  const handleCardClick = (data) => {
-    navigate(`/details/${data.title}`, { state: data });
-  };
 
   return (
     <div className="">
@@ -52,8 +69,9 @@ function ChooseCertificate() {
             {certificateData.map((data, index) => (
               <div
                 key={index}
-                className="bg-[#B9D8DB] rounded-xl shadow-md p-3"
-                onClick={() => handleCardClick(data)}
+                className="bg-[#B9D8DB] rounded-xl shadow-md p-3 cursor-pointer"
+                onClick={() => setSelectedCertificate(data)}
+                
               >
                 <img
                   src={data.image}
@@ -91,4 +109,4 @@ function ChooseCertificate() {
   );
 }
 
-export default ChooseCertificate
+export default ChooseCertificate;
