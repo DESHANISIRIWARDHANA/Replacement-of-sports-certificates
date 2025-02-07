@@ -6,7 +6,7 @@ function MainContent({ selectedPage }) {
 
   const renderContent = () => {
     switch (selectedPage) {
-      case "Personal-Details":
+      case "Personal Details":
         return <PersonalDetails />;
       case "Certificates":
         return <ChooseCertificate />;

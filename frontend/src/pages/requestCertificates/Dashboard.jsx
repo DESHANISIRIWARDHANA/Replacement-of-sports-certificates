@@ -5,7 +5,7 @@ import Navbar from "./Navbar";
 import MainContent from "./MainContent";
 
 function Dashboard({ sidebarToggle, setSidebarToggle }) {
-  const [selectedPage, setSelectedPage] = useState("Personal-Details");
+  const [selectedPage, setSelectedPage] = useState("Personal Details");
 
   return (
     <div className="flex w-full">
