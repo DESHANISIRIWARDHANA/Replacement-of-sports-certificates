@@ -1,5 +1,4 @@
 /* eslint-disable react/prop-types */
-
 import { FaBars } from "react-icons/fa";
 import { FiBell } from "react-icons/fi";
 import profile from "../../assets/images/profile.png";

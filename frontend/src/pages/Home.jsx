@@ -1,4 +1,3 @@
-//import React from 'react'
 import HomeBg from "../assets/images/homeBg.png"
 
 function Home() {
