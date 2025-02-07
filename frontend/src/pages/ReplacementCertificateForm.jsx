@@ -49,7 +49,7 @@ export default function ReplacementCertificateForm() {
               <label className="block text-sm font-medium">Event Name</label>
               <input
                 {...register("eventName")}
-                className="w-full border p-2 rounded mt-1 bg-blue-100"
+                className="w-full p-2 rounded mt-1 bg-[#B9D8DB]"
               />
               <p className="text-red-500 text-sm">{errors.eventName?.message}</p>
             </div>
@@ -57,7 +57,7 @@ export default function ReplacementCertificateForm() {
               <label className="block text-sm font-medium">Type of Certificate</label>
               <input
                 {...register("certificateType")}
-                className="w-full border p-2 rounded mt-1 bg-blue-100"
+                className="w-full p-2 rounded mt-1 bg-[#B9D8DB]"
               />
               <p className="text-red-500 text-sm">{errors.certificateType?.message}</p>
             </div>
@@ -66,7 +66,7 @@ export default function ReplacementCertificateForm() {
               <input
                 type="date"
                 {...register("dateOfIssue")}
-                className="w-1/2 border p-2 rounded mt-1 bg-blue-100"
+                className="w-1/2 p-2 rounded mt-1 bg-[#B9D8DB]"
               />
               <p className="text-red-500 text-sm">{errors.dateOfIssue?.message}</p>
             </div>
@@ -74,15 +74,15 @@ export default function ReplacementCertificateForm() {
               <label className="block text-sm font-medium">Reason</label>
               <textarea
                 {...register("reason")}
-                className="w-full border p-2 rounded mt-1 bg-blue-100"
+                className="w-full p-2 rounded mt-1 bg-[#B9D8DB]"
               />
               <p className="text-red-500 text-sm">{errors.reason?.message}</p>
             </div>
           </form>
         </div>
         <div className="mt-4 text-right">
-          <button className="bg-gray-500 text-white px-4 py-2 rounded mr-2">Back</button>
-          <button className="bg-blue-500 text-white px-4 py-2 rounded">Next</button>
+          <button className="bg-[#3C9C5121] text-black px-4 py-2 rounded mr-2">Back</button>
+          <button className="bg-[#3C9C5154] text-black px-4 py-2 rounded">Next</button>
         </div>
       </div>
     </div>

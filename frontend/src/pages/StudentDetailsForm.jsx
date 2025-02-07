@@ -53,7 +53,7 @@ export default function StudentDetailsForm() {
           <label className="block text-sm font-medium text-left">Full Name</label>
           <input
             {...register("fullName")}
-            className="w-full border p-2 rounded mt-1 text-left bg-blue-100"
+            className="w-full  p-2 rounded mt-1 text-left bg-[#B9D8DB]"
           />
           <p className="text-red-500 text-sm text-left">{errors.fullName?.message}</p>
         </div>
@@ -61,40 +61,40 @@ export default function StudentDetailsForm() {
           <label className="block text-sm  font-medium text-left">Faculty Name</label>
           <input
             {...register("facultyName")}
-            className="w-full border p-2 rounded mt-1 text-left bg-blue-100"
+            className="w-full  p-2 rounded mt-1 text-left bg-[#B9D8DB]"
           />
           <p className="text-red-500 text-sm text-left">{errors.facultyName?.message}</p>
         </div>
         <div className="flex flex-col items-start">
           <label className="block text-sm font-medium font-left">Student ID</label>
-          <input {...register("studentId")} className="w-full border p-2 rounded mt-1 bg-blue-100" />
+          <input {...register("studentId")} className="w-full  p-2 rounded mt-1 bg-[#B9D8DB]" />
           <p className="text-red-500 text-sm text-left">{errors.studentId?.message}</p>
         </div>
         <div className="flex flex-col items-start">
           <label className="block text-sm font-medium font-left">Date of Birth</label>
-          <input type="date" {...register("dateOfBirth")} className="w-full border p-2 rounded mt-1 text-left bg-blue-100"
+          <input type="date" {...register("dateOfBirth")} className="w-full  p-2 rounded mt-1 text-left bg-[#B9D8DB]"
           max={new Date().toISOString().split("T")[0]}  />
           <p className="text-red-500 text-left">{errors.dateOfBirth?.message}</p>
         </div>
         <div className="col-span-2 flex flex-col items-start">
           <label className="block text-sm font-medium font-left">Address</label>
-          <textarea {...register("address")} className="w-full border p-2 rounded mt-1 text-left bg-blue-100" />
+          <textarea {...register("address")} className="w-full  p-2 rounded mt-1 text-left bg-[#B9D8DB]" />
           <p className="text-red-500 text-sm text-left">{errors.address?.message}</p>
         </div>
         <div className="flex flex-col items-start">
           <label className="block text-sm font-medium text-left">Email</label>
-          <input type="email" {...register("email")} className="w-full border p-2 rounded mt-1 text-left bg-blue-100" />
+          <input type="email" {...register("email")} className="w-full  p-2 rounded mt-1 text-left bg-[#B9D8DB]" />
           <p className="text-red-500 text-sm text-left">{errors.email?.message}</p>
         </div>
         <div className="flex flex-col items-start">
           <label className="block text-sm font-medium text-left">Phone Number</label>
-          <input {...register("phoneNumber")} className="w-full border p-2 rounded mt-1 text-left bg-blue-100" />
+          <input {...register("phoneNumber")} className="w-full  p-2 rounded mt-1 text-left bg-[#B9D8DB]" />
           <p className="text-red-500 text-sm text-left">{errors.phoneNumber?.message}</p>
         </div>
       </form>
     </div>
     <div className="mt-4 text-right">
-          <button type="submit" className="bg-green-500 text-white px-6 py-2 rounded">Save</button>
+          <button type="submit" className="bg-[#3C9C51] text-white px-6 py-2 rounded">Save</button>
         </div>
     </div>
     </div>
