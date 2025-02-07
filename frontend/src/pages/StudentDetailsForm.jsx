@@ -39,10 +39,14 @@ export default function StudentDetailsForm() {
       )}
         
      
-      <div className="flex-1 p-6 ">
-
+        <div
+        className={`flex-1 p-6 transition-all duration-300 ${
+          isSidebarOpen ? "ml-64" : "ml-0" 
+        }`}
+      >
+        <div className="flex justify-between items-center mb-4">
       <h1 className="text-2xl font-bold mb-4 text-left mt-12">Student Details</h1>
-
+</div>
       <div className="bg-white shadow-md rounded-lg p-6">
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
         <div className="flex flex-col items-start">
