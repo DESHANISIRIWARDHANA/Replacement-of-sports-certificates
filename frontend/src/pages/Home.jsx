@@ -7,7 +7,6 @@ function Home() {
 
       <div className="absolute bottom-[7rem] px-5 sm:px-10 text-white">
         <h1 className="text-3xl font-bold">
-          {" "}
           Replace Your Sports Certificate Easily
         </h1>
         <p className="text-medium max-w-md mt-2">

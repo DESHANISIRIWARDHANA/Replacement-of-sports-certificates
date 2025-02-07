@@ -10,7 +10,6 @@ function MainContent({ selectedPage }) {
         return <PersonalDetails />;
       case "Certificates":
         return <ChooseCertificate />;
-      
       default:
         return <ChooseCertificate />;
     }
