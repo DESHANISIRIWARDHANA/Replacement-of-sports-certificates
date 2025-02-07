@@ -6,7 +6,6 @@ export default function Sidebar({ activeTab, setActiveTab }) {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(true); 
 
- 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
@@ -14,26 +13,38 @@ export default function Sidebar({ activeTab, setActiveTab }) {
   const handleTabClick = (tab) => {
     setActiveTab(tab);
     navigate(`/${tab}`);
+    switch (tab) {
+      case "personalDetails":
+        navigate("/personalDetails"); 
+        break;
+      case "certificateDetails":
+        navigate("/ReplacementCertificateForm"); 
+        break;
+      
+      default:
+        break;
+    }
   };
+
+  
 
   return (
     <div className="h-screen flex">
       
       <button
         onClick={toggleSidebar}
-        className="fixed top-4 left-4 z-50 bg-gray-800 text-white p-2 rounded mb-10"
+        className="fixed top-6 left-4 z-50 bg-gray-800 text-white p-2 rounded mb-10" 
       >
         <FaBars size={20} />
       </button>
 
-      
       <div
         className={`fixed top-0 left-0 h-full bg-blue-100 shadow-lg transform ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         } transition-transform duration-300 ease-in-out w-64 p-4 flex flex-col`}
       >
         
-        <nav className="flex-1 mt-6">
+        <nav className="flex-1 mt-12"> 
           <ul className="space-y-2">
             {[
               { id: "personalDetails", label: "Personal Details", icon: <FaUser /> },
@@ -55,7 +66,6 @@ export default function Sidebar({ activeTab, setActiveTab }) {
           </ul>
         </nav>
 
-        
         <div
           className="mt-auto p-3 bg-red-500 text-white cursor-pointer rounded-lg hover:bg-red-600"
           onClick={() => alert("Logging out...")}
