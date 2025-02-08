@@ -1,4 +1,5 @@
 import HomeBg from "../assets/images/homeBg.png";
+import Footer from "../components/Footer";
 import AboutPage from "./AboutPage";
 import Contact from "./Contact";
 
@@ -40,6 +41,10 @@ function Home() {
       {/* Contact Info Page */}
       <div>
        <Contact />
+      </div>
+
+      <div>
+        <Footer />
       </div>
     </div>
   );

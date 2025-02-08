@@ -8,9 +8,9 @@ function Contact() {
   return (
     <div className="flex items-center justify-center h-max">
       <div className="w-full h-full flex items-center justify-center">
-        <div className="w-full h-full bg-white shadow-lg p-8 flex ">
+        <div className="w-full h-full bg-white  p-8 flex ">
           <div className="grid grid-cols-1 md:grid-cols-2 h-full w-full">
-            
+
             <div className="bg-[#67CDCD] flex flex-col  items-start text-black sm:p-20 p-2">
               <h2 className="text-3xl font-bold mb-4">Contact Info</h2>
               <p className="text-medium mb-3">
