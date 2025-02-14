@@ -18,6 +18,7 @@ import Navbar from "./components/Navbar";
 import Contact from "./pages/Contact";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import VerifyCert from "./pages/VerifyCertificate";
 
 import CertificateRequestForm from "../src/pages/requestForm/cerificate-request-form";
 
@@ -58,6 +59,7 @@ function App() {
           element={<CertificationDetails />}
         />
         <Route path="/admin/profile" element={<AdminProfile />} />
+        <Route path="/verifycert" element={<VerifyCert />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/add-admin" element={<AddNewAdmin />} />
         <Route path="/student-details" element={<StudentDetails />} />
