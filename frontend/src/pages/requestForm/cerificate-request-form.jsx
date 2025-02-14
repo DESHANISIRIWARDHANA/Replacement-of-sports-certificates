@@ -76,6 +76,19 @@ const CertificateRequestForm = () => {
       );
       console.log("Request submitted successfully:", response.data);
       // Handle success (e.g., show a success message, redirect to another page, etc.)
+
+      // Call the additional API to approve the request
+      const requestId = response.data.request_id; // Assuming the response contains the request ID
+      const approveResponse = await axios.post(
+        `http://localhost:5000/api/admin/approve/${requestId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("Request approved successfully:", approveResponse.data);
     } catch (error) {
       console.error("Error submitting request:", error);
       // Handle error (e.g., show an error message)
