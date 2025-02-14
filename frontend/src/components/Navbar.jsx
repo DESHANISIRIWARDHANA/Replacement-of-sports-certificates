@@ -9,7 +9,7 @@ function Navbar() {
   const MenuLinks = [
     { id: 1, name: "HOME", link: "/" },
     { id: 2, name: "ABOUT", link: "/about" },
-    { id: 3, name: "REQUEST", link: "/request" },
+    { id: 3, name: "REQUEST", link: "/apply-request-certificate" },
     { id: 5, name: "CERTIFICATE", link: "/certificate" },
     { id: 6, name: "CONTACT", link: "/contact" },
   ];
