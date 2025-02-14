@@ -7,7 +7,7 @@ import Replacement from "./Replacement";
 function Home() {
   return (
     <div>
-      <div className="sm:m-7 ">
+      <div className=" ">
         <img
           src={HomeBg}
           alt="Home Background"
