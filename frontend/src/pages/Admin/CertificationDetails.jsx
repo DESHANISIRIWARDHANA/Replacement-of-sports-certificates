@@ -14,6 +14,8 @@ function CertificateDetails() {
   useEffect(() => {
     // Fetch certificate details from the backend
     const token = localStorage.getItem("token");
+    console.log("Certificate ID from useParams:", certificate_id);
+
     axios
       .get(`http://localhost:5000/api/admin/certificate/${certificate_id}`, {
         headers: {
@@ -21,6 +23,7 @@ function CertificateDetails() {
         },
       })
       .then((response) => {
+        console.log("API response:", response.data);
         setCertificate(response.data.certificate);
       })
       .catch((error) => {
@@ -42,7 +45,7 @@ function CertificateDetails() {
   }
 
   return (
-    <div className="p-5">
+    <div className="p-5 mt-32 mr-10 ml-10">
       <div
         className="flex items-center space-x-2 cursor-pointer"
         onClick={() => navigate(-1)}

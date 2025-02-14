@@ -47,7 +47,7 @@ function App() {
         />
         <Route
           path="/certificate/:certificate_id"
-          element={<CertificateDetails />}
+          element={<CertificationDetails />}
         />
         <Route path="/admin/profile" element={<AdminProfile />} />
         <Route path="/admin" element={<AdminDashboard />} />
