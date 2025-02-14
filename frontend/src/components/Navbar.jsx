@@ -16,7 +16,7 @@ function Navbar() {
 
   return (
     <>
-      <div className="flex justify-center items-center w-full py-1">
+      <div className=" justify-center items-center w-full py-1">
         <img src={logo} alt="Logo" className="w-[70px] h-[70px]" />
       </div>
 

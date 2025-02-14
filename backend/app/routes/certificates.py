@@ -6,9 +6,19 @@ from app.services.firebase import FirebaseService
 
 cert_bp = Blueprint('certificates', __name__)
 
-#Create request
+# Handle CORS preflight requests properly
+@cert_bp.route('/request', methods=['OPTIONS'])
+def handle_options():
+    response = make_response(jsonify({"message": "Preflight OK"}), 200)
+    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:5173'
+    response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    return response
+
+# Create request (must match OPTIONS endpoint)
 @cert_bp.route('/request', methods=['POST'])
-@token_required(roles=['athlete'])
+@token_required(roles=['athlete', 'admin'])
 def create_request(current_user):
     return CertificateService.create_request(current_user)
 

@@ -1,5 +1,5 @@
 from flask import Flask, send_from_directory
-from flask_cors import CORS  # Import CORS
+from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
 import os
 
@@ -7,12 +7,13 @@ def create_app():
     app = Flask(__name__, static_folder="static")
     app.config.from_object('app.config.Config')
 
-    # Enable CORS for the entire app (or specify origins as needed)
-    CORS(app)
+    # Apply CORS globally with explicit settings
+    CORS(app, supports_credentials=True)
 
-    # Initialize Firebase (already handled in firebase.py)
+
+    # Initialize Firebase
     from app.services import firebase
-    firebase  # Imported for initialization
+    firebase  
 
     # Register blueprints
     from app.routes.auth import auth_bp
@@ -27,7 +28,7 @@ def create_app():
 
     # Swagger UI setup
     SWAGGER_URL = "/api/docs"
-    API_URL = "/static/swagger.yaml"  # Correct path for static file
+    API_URL = "/static/swagger.yaml"
 
     swagger_bp = get_swaggerui_blueprint(
         SWAGGER_URL,
@@ -36,7 +37,7 @@ def create_app():
     )
     app.register_blueprint(swagger_bp, url_prefix=SWAGGER_URL)
 
-    # Add route to serve static files manually
+    # Manually handle static file serving
     @app.route('/static/<path:filename>')
     def serve_static(filename):
         return send_from_directory(os.path.join(app.root_path, 'static'), filename)

@@ -7,7 +7,7 @@ import logging
 from app.config import Config
 
 # Initialize Firebase once
-cred = credentials.Certificate("serviceAccountKey.json")
+cred = credentials.Certificate(r"D:\Replacement-of-sports-certificates\backend\app\services\serviceAccountKey.json")
 firebase_app = initialize_app(cred, {
     'storageBucket': Config.FIREBASE_CONFIG['storageBucket']
 })
