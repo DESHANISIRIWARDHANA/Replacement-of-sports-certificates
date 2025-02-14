@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { FiMenu, FiX } from "react-icons/fi"; 
-import logo from "../assets/images/logo.png"
+import { FiMenu, FiX } from "react-icons/fi";
+import logo from "../assets/images/logo.png";
 
 function Navbar() {
   const [showMenu, setShowMenu] = useState(false);

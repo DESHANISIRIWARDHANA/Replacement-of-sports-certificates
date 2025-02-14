@@ -1,42 +1,38 @@
-/* eslint-disable react/prop-types */
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { CiSearch } from "react-icons/ci";
-import certificate from "../assets/images/Certificate.png";
 import { RiArrowDownSFill } from "react-icons/ri";
 import { IoIosArrowDown } from "react-icons/io";
+import placeholderImage from "../assets/images/Certificate.png"; // Import the placeholder image
 
 function ChooseCertificate({ setSelectedCertificate }) {
-  const certificateData = [
-    {
-      image: certificate,
-      title: "Certificate Details A",
-      date: "15 July 2024",
-    },
-    {
-      image: certificate,
-      title: "Certificate Details B",
-      date: "15 July 2024",
-    },
-    {
-      image: certificate,
-      title: "Certificate Details C",
-      date: "15 July 2024",
-    },
-    {
-      image: certificate,
-      title: "Certificate Details D",
-      date: "15 July 2024",
-    },
-    {
-      image: certificate,
-      title: "Certificate Details E",
-      date: "15 July 2024",
-    },
-    {
-      image: certificate,
-      title: "Certificate Details F",
-      date: "15 July 2024",
-    },
-  ];
+  const [certificateData, setCertificateData] = useState([]);
+  const [images, setImages] = useState(placeholderImage); // Use the placeholder image
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch certificates from the backend
+    const token = localStorage.getItem("token");
+    console.log("Token:", token);
+    axios
+      .get("http://localhost:5000/api/certificates/certificates", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        setCertificateData(response.data.certificates);
+      })
+      .catch((error) => {
+        console.error("Error fetching certificates:", error);
+      });
+  }, []);
+
+  const handleCertificateClick = (data) => {
+    setSelectedCertificate(data);
+    navigate(`/certificate/${data.certificate_id}`);
+  };
 
   return (
     <div className="">
@@ -70,18 +66,23 @@ function ChooseCertificate({ setSelectedCertificate }) {
               <div
                 key={index}
                 className="bg-[#B9D8DB] rounded-xl shadow-md p-3 cursor-pointer"
-                onClick={() => setSelectedCertificate(data)}
-                
+                onClick={() => handleCertificateClick(data)}
               >
-                <img
-                  src={data.image}
-                  alt={data.title}
-                  className="w-full h-auto mb-2 rounded-xl"
-                />
+                {images ? (
+                  <img
+                    src={images}
+                    alt={data.title}
+                    className="w-full h-auto mb-2 rounded-xl"
+                  />
+                ) : (
+                  <p>Loading...</p>
+                )}
                 <h2 className="text-center font-semibold text-[18px] px-3 py-1">
-                  {data.title}
+                  {data.event_name}
                 </h2>
-                <p className="text-center text-sm font-normal">{data.date}</p>
+                <p className="text-center text-sm font-normal">
+                  {data.date_issued}
+                </p>
               </div>
             ))}
           </div>
