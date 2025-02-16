@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
 import os
@@ -9,7 +9,6 @@ def create_app():
 
     # Apply CORS globally with explicit settings
     CORS(app, supports_credentials=True)
-
 
     # Initialize Firebase
     from app.services import firebase
@@ -41,5 +40,27 @@ def create_app():
     @app.route('/static/<path:filename>')
     def serve_static(filename):
         return send_from_directory(os.path.join(app.root_path, 'static'), filename)
+
+    # Import model-specific code
+    from app.model import allowed_file, predict_certificate
+
+    @app.route('/predict', methods=['POST'])
+    def predict():
+        if 'certificate' not in request.files:
+            return jsonify({'error': 'No file uploaded'}), 400
+
+        file = request.files['certificate']
+        
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+
+        if not allowed_file(file.filename):
+            return jsonify({'error': 'Invalid file type. Only PNG, JPG, and JPEG are allowed.'}), 400
+
+        result = predict_certificate(file)
+        if 'error' in result:
+            return jsonify(result), 500
+
+        return jsonify(result)
 
     return app

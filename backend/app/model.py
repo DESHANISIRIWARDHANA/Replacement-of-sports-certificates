@@ -1,35 +1,26 @@
-from flask import Flask, request, jsonify
 import tensorflow as tf
 import numpy as np
 from tensorflow.keras.models import load_model
 import io
 from PIL import Image
-from flask_cors import CORS
+import os
 
-app = Flask(__name__)
-CORS(app)
+# Print the current working directory
+print("Current working directory:", os.getcwd())
+
+# Construct the absolute path to the model file
+model_path = os.path.join(os.path.dirname(__file__), 'certificate_verification_model.h5')
+print("Model path:", model_path)
 
 # Load the trained model
-model = load_model('certificate_verification_model.h5')
+model = load_model(model_path)
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}  # Allowed file types
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    if 'certificate' not in request.files:
-        return jsonify({'error': 'No file uploaded'}), 400
-
-    file = request.files['certificate']
-    
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
-
-    if not allowed_file(file.filename):
-        return jsonify({'error': 'Invalid file type. Only PNG, JPG, and JPEG are allowed.'}), 400
-
+def predict_certificate(file):
     try:
         # Read image and convert to RGB (remove transparency)
         img_bytes = io.BytesIO(file.read())
@@ -45,10 +36,7 @@ def predict():
         prediction = model.predict(img_array)
         result = "Real" if prediction[0] > 0.5 else "Fake"
 
-        return jsonify({'prediction': result})
+        return {'prediction': result}
 
     except Exception as e:
-        return jsonify({'error': f'Processing error: {str(e)}'}), 500
-
-if __name__ == '__main__':
-    app.run(debug=True)
+        return {'error': f'Processing error: {str(e)}'}

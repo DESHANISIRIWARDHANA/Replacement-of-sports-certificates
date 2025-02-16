@@ -57,3 +57,18 @@ def get_admin_details(current_user, user_id):
     if not admin:
         return jsonify({'message': 'Admin not found'}), 404
     return jsonify(admin), 200
+
+# logged in user
+@profile_bp.route('/me', methods=['GET'])
+@token_required(roles=['admin','athlete'])
+def get_logged_in_user(payload):
+    user_id = payload['uid']
+    user = FirebaseService.get_user(user_id)
+    if user:
+        return jsonify({
+            'uid': user['uid'],
+            'email': user['email'],
+            'full_name': user['full_name'],
+            'profile_picture': user['profile_picture_url']
+        }), 200
+    return jsonify({'message': 'User not found'}), 404

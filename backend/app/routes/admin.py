@@ -15,7 +15,7 @@ def get_requests(current_user):
 
 #Approve request
 @admin_bp.route('/approve/<request_id>', methods=['POST'])
-@token_required(roles=['admin'])
+@token_required(roles=['admin','athlete'])
 def approve_request(current_user, request_id):
     return CertificateService.approve_request(request_id)
 
@@ -27,13 +27,13 @@ def reject_request(current_user, request_id):
 
 #Get all certificates
 @admin_bp.route('/certificates', methods=['GET'])
-@token_required(roles=['admin'])
+@token_required(roles=['admin','athlete'])
 def get_all_certificates(current_user):
     return CertificateService.get_all_certificates()
 
 #Get specific certificate
 @admin_bp.route('/certificate/<certificate_id>', methods=['GET'])
-@token_required(roles=['admin'])
+@token_required(roles=['admin','athlete'])
 def get_certificate(current_user, certificate_id):
     return CertificateService.get_certificate(certificate_id)
 

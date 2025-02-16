@@ -31,7 +31,7 @@ function ChooseCertificate({ setSelectedCertificate }) {
 
   const handleCertificateClick = (data) => {
     setSelectedCertificate(data);
-    navigate(`/certificate/${data.certificate_id}`);
+    navigate(`/admin/certificate/${data.certificate_id}`);
   };
 
   return (

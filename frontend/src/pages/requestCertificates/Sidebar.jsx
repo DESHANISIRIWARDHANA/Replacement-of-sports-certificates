@@ -8,12 +8,17 @@ function Sidebar({ sidebarToggle, onSelectPage }) {
   const navigate = useNavigate();
   const sidebarItems = [
     {
-      label: "Personal Details",
+      label: "Personal",
       icon: <IoPersonSharp className="w-6 h-6" />,
       route: "",
     },
     {
       label: "Certificates",
+      icon: <TbCertificate className="w-6 h-6" />,
+      route: "",
+    },
+    {
+      label: "Verify",
       icon: <TbCertificate className="w-6 h-6" />,
       route: "",
     },
