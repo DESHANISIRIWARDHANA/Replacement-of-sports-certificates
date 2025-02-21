@@ -34,7 +34,7 @@ const imageUrl =
 function App() {
   return (
     <BrowserRouter>
-      <Navbar />
+      <Navbar calssName="pb-10" />
 
       <Routes>
         {/* common */}

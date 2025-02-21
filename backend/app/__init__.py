@@ -42,10 +42,31 @@ def create_app():
         return send_from_directory(os.path.join(app.root_path, 'static'), filename)
 
     # Import model-specific code
-    from app.model import allowed_file, predict_certificate
+    from app.services.ocr_service import allowed_file as ocr_allowed_file, predict_certificate as ocr_predict_certificate
+    from app.model import allowed_file as model_allowed_file, predict_certificate as model_predict_certificate
 
-    @app.route('/predict', methods=['POST'])
-    def predict():
+    @app.route('/predict/ocr', methods=['POST'])
+    def predict_ocr():
+        if 'certificate' not in request.files:
+            return jsonify({'error': 'No file uploaded'}), 400
+
+        file = request.files['certificate']
+        user_certificate_id = request.form.get('certificate_id')
+        
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+
+        if not ocr_allowed_file(file.filename):
+            return jsonify({'error': 'Invalid file type. Only PNG, JPG, and JPEG are allowed.'}), 400
+
+        result = ocr_predict_certificate(file, user_certificate_id)
+        if 'error' in result:
+            return jsonify(result), 500
+
+        return jsonify(result)
+
+    @app.route('/predict/model', methods=['POST'])
+    def predict_model():
         if 'certificate' not in request.files:
             return jsonify({'error': 'No file uploaded'}), 400
 
@@ -54,10 +75,10 @@ def create_app():
         if file.filename == '':
             return jsonify({'error': 'No selected file'}), 400
 
-        if not allowed_file(file.filename):
+        if not model_allowed_file(file.filename):
             return jsonify({'error': 'Invalid file type. Only PNG, JPG, and JPEG are allowed.'}), 400
 
-        result = predict_certificate(file)
+        result = model_predict_certificate(file)
         if 'error' in result:
             return jsonify(result), 500
 

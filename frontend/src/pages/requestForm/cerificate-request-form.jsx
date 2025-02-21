@@ -1,10 +1,10 @@
-"use client";
-
 import { useState } from "react";
 import { Upload } from "lucide-react";
 import axios from "axios";
+import Spinner from "../../components/Spinner";
 
 const CertificateRequestForm = () => {
+  const [loading, setLoading] = useState(false);
   const [activeStep, setActiveStep] = useState("personal"); // personal, certificate, upload, review
   const [formData, setFormData] = useState({
     fullName: "",
@@ -18,11 +18,16 @@ const CertificateRequestForm = () => {
     certificateType: "",
     dateOfIssue: "",
     reason: "",
+    certificate_id: null,
+    prediction: null,
   });
+  const [isOCRProcessing, setIsOCRProcessing] = useState(false); // New state
+
   const [uploadedFiles, setUploadedFiles] = useState({
     certificate: null,
     id: null,
   });
+  const [directApproval, setDirectApproval] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -32,10 +37,9 @@ const CertificateRequestForm = () => {
     }));
   };
 
-  const handleFileUpload = (e, type) => {
+  const handleFileUpload = async (e, type) => {
     const file = e.target.files[0];
     if (file && file.size > 3 * 1024 * 1024) {
-      // 3MB limit
       alert("File size must be less than 3MB");
       e.target.value = "";
       return;
@@ -44,9 +48,82 @@ const CertificateRequestForm = () => {
       ...prevState,
       [type]: file,
     }));
+
+    // Only trigger OCR if the certificate is uploaded
+    if (type === "certificate" && file) {
+      setIsOCRProcessing(true);
+      const formDataToSend = new FormData();
+      formDataToSend.append("certificate", file);
+      formDataToSend.append("certificate_id", formData.certificate_id);
+
+      try {
+        const response = await axios.post(
+          "http://localhost:5000/predict/ocr",
+          formDataToSend,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        const prediction =
+          response.data.prediction === "sports" ? "sports" : "non-sports";
+
+        setFormData((prevState) => ({
+          ...prevState,
+          certificate_id: response.data.certificate_id_match
+            ? formData.certificate_id
+            : null,
+          prediction: prediction,
+        }));
+
+        if (response.data.prediction === "non-sports") {
+          alert(
+            "This is not a sports certificate. Please cancel the submission."
+          );
+          // You can prevent the submission process or reset form here
+          setActiveStep("certificate"); // Restart at certificate step
+        } else if (!response.data.certificate_id_match) {
+          alert("The certificate ID does not match. You can still submit.");
+          setDirectApproval(false); // Allow submission even if ID doesn't match
+        } else {
+          setDirectApproval(true); // Allow direct approval if ID matches
+        }
+      } catch (error) {
+        console.error("Error performing OCR prediction:", error);
+        setDirectApproval(false);
+        setFormData((prevState) => ({
+          ...prevState,
+          certificate_id: null,
+          prediction: "non-sports",
+        }));
+      } finally {
+        setIsOCRProcessing(false);
+      }
+    }
   };
 
   const handleSubmit = async () => {
+    // Check if OCR is still processing or not
+    if (isOCRProcessing) {
+      alert("Please wait for OCR processing to finish.");
+      return; // Stop the submission if OCR is still processing
+    }
+
+    // Now check if certificate_id and prediction are available
+    if (!formData.prediction) {
+      alert("Wait till OCR Processing done...");
+      return; // Stop the submission if any required fields are missing
+    }
+
+    setLoading(true);
+
+    // Simulate API call or long process
+    setTimeout(() => {
+      setLoading(false);
+      // Handle your form submission logic here
+    }, 2000);
     const token = localStorage.getItem("token");
     const formDataToSend = new FormData();
     formDataToSend.append("fullName", formData.fullName);
@@ -63,6 +140,25 @@ const CertificateRequestForm = () => {
     formDataToSend.append("oldDocumentCopy", uploadedFiles.certificate);
     formDataToSend.append("NIC", uploadedFiles.id);
 
+    // Only append certificate_id and prediction if a certificate is uploaded
+    if (uploadedFiles.certificate && formData.certificate_id) {
+      formDataToSend.append("certificate_id", formData.certificate_id);
+      formDataToSend.append("prediction", formData.prediction);
+    }
+
+    // Check if it's a non-sports certificate
+    if (formData.prediction === "non-sports") {
+      alert("This is not a sports certificate. You cannot submit.");
+      return;
+    }
+
+    // If certificate ID doesn't match, allow submission but notify user
+    if (!formData.certificate_id) {
+      alert(
+        "Certificate ID does not match. However, you can still submit the request."
+      );
+    }
+
     try {
       const response = await axios.post(
         "http://localhost:5000/api/certificates/request",
@@ -74,24 +170,48 @@ const CertificateRequestForm = () => {
           },
         }
       );
-      console.log("Request submitted successfully:", response.data);
-      // Handle success (e.g., show a success message, redirect to another page, etc.)
 
-      // Call the additional API to approve the request
-      const requestId = response.data.request_id; // Assuming the response contains the request ID
-      const approveResponse = await axios.post(
-        `http://localhost:5000/api/admin/approve/${requestId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log("Request approved successfully:", approveResponse.data);
+      console.log("Response from backend:", response.data);
+
+      if (directApproval) {
+        const requestId = response.data.request_id;
+        const approveResponse = await axios.post(
+          `http://localhost:5000/api/admin/approve/${requestId}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        console.log("Request approved successfully:", approveResponse.data);
+      } else {
+        alert("The request has been submitted for admin review.");
+      }
+
+      // After successful submission, reset form state and return to the initial step
+      setFormData({
+        fullName: "",
+        facultyName: "",
+        studentId: "",
+        dateOfBirth: "",
+        address: "",
+        email: "",
+        phoneNumber: "",
+        eventName: "",
+        certificateType: "",
+        dateOfIssue: "",
+        reason: "",
+        certificate_id: null,
+        prediction: null,
+      });
+      setUploadedFiles({
+        certificate: null,
+        id: null,
+      });
+      setActiveStep("personal"); // Reset the step to the first one
     } catch (error) {
       console.error("Error submitting request:", error);
-      // Handle error (e.g., show an error message)
     }
   };
 
@@ -189,6 +309,16 @@ const CertificateRequestForm = () => {
         />
       </div>
       <div>
+        <label className="block text-sm mb-2">Certificate ID</label>
+        <input
+          type="text"
+          name="certificate_id"
+          value={formData.certificate_id}
+          onChange={handleInputChange}
+          className="w-full p-2 rounded bg-[#f8fafc] border border-gray-200"
+        />
+      </div>
+      <div>
         <label className="block text-sm mb-2">Type Of Certificate</label>
         <input
           type="text"
@@ -235,7 +365,7 @@ const CertificateRequestForm = () => {
           <input
             type="file"
             onChange={(e) => handleFileUpload(e, "certificate")}
-            accept=".pdf,.png"
+            accept=".png,jpg,jpeg"
             className="hidden"
             id="certificate-upload"
           />
@@ -344,6 +474,7 @@ const CertificateRequestForm = () => {
               : "bg-[#40b66b] text-white hover:bg-[#40b66b]/90"
           }`}
         >
+          {/* {loading ? <Spinner /> : "Submit"} */}
           {activeStep === "review" ? "Submit" : "Next"}
         </button>
       </div>
@@ -386,6 +517,11 @@ const CertificateRequestForm = () => {
           </nav>
         </div>
         <div className="flex-1 pl-8">
+          {isOCRProcessing && (
+            <div className="flex justify-center items-center mb-4">
+              <Spinner /> <span className="ml-2">Processing OCR...</span>
+            </div>
+          )}
           {renderStepContent()}
           {renderNavigation()}
         </div>

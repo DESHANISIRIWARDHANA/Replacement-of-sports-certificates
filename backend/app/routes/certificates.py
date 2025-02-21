@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, jsonify
 from app.utils.decorators import token_required
 from app.services.certificates import CertificateService
 # In certificates.py and auth.py
@@ -20,7 +20,10 @@ cert_bp = Blueprint('certificates', __name__)
 @cert_bp.route('/request', methods=['POST'])
 @token_required(roles=['athlete', 'admin'])
 def create_request(current_user):
-    return CertificateService.create_request(current_user)
+    try:
+        return CertificateService.create_request(current_user)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
 
 #Get status of the request
 @cert_bp.route('/status', methods=['GET'])

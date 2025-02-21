@@ -7,3 +7,5 @@ class Config:
         'storageBucket': 'wastenet-59699.appspot.com',  # From Firebase console
         'projectId': 'wastenet-59699'                   # From Firebase console
     }
+    UPLOAD_FOLDER = "static/uploads"
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}

@@ -30,11 +30,14 @@ class CertificateService:
             data = request.form
             files = request.files
 
-            # Upload supporting documents
-            old_doc_url = FirebaseService.upload_file(
-                files['oldDocumentCopy'],
-                f"requests/{user['uid']}/{datetime.now().isoformat()}_{files['oldDocumentCopy'].filename}"
-            )
+            # Upload supporting documents if provided
+            old_doc_url = None
+            if 'oldDocumentCopy' in files and files['oldDocumentCopy'].filename:
+                old_doc_url = FirebaseService.upload_file(
+                    files['oldDocumentCopy'],
+                    f"requests/{user['uid']}/{datetime.now().isoformat()}_{files['oldDocumentCopy'].filename}"
+                )
+
             nic_url = FirebaseService.upload_file(
                 files['NIC'],
                 f"requests/{user['uid']}/{datetime.now().isoformat()}_{files['NIC'].filename}"
@@ -57,7 +60,9 @@ class CertificateService:
                 'event_name': data.get('eventName'),
                 'certificate_type': data.get('certificateType'),
                 'date_issued': data.get('dateIssued'),
-                'reason': data.get('reason')
+                'reason': data.get('reason'),
+                "certificate_id": data.get('certificate_id', None),  # Optional
+                "prediction": data.get('prediction')
             }
 
             # Add the request to the database and get the request_id
@@ -71,7 +76,9 @@ class CertificateService:
             return {'message': 'Request submitted successfully', 'request_id': request_id}, 201
 
         except Exception as e:
+            print("Error in create_request:", str(e))  # Debugging
             raise CertificateError(str(e))
+
 
 #Get status of the request for users not admin
     @staticmethod
