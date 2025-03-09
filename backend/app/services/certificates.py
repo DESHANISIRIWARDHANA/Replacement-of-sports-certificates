@@ -18,7 +18,6 @@ font_path = os.path.join(current_dir, '../services/templates/YoungSerif-Regular.
 pdfmetrics.registerFont(TTFont('YoungSerif', font_path))
 
 class CertificateService:
-
 #Request for certificate replacement
     @staticmethod
     def create_request(user):
@@ -61,8 +60,14 @@ class CertificateService:
                 'certificate_type': data.get('certificateType'),
                 'date_issued': data.get('dateIssued'),
                 'reason': data.get('reason'),
+                'meet': data.get('meet'),
+                'ageGroup': data.get('ageGroup'),
+                'nic': data.get('nic'),
+                'place': data.get('place'),
+                'birthCertNumber': data.get('birthCertNumber'),
                 "certificate_id": data.get('certificate_id', None),  # Optional
-                "prediction": data.get('prediction')
+                "prediction": data.get('prediction'),
+                'matchingPercentage': data.get('matchingPercentage')
             }
 
             # Add the request to the database and get the request_id
@@ -79,7 +84,66 @@ class CertificateService:
             print("Error in create_request:", str(e))  # Debugging
             raise CertificateError(str(e))
 
+#Add valid certificate to DB
+    @staticmethod
+    def add_valid_certificate():
+        try:
+            data = request.get_json()
+            print("Received data:", data)  # Add logging to check received data
 
+            certificate_data = {
+                'certificate_id': data['certificate_id'],
+                'nic': data['nic'],
+                'name': data['name'],
+                'meet': data['meet'],
+                'ageGroup': data['ageGroup'],
+                'place': data['place'],
+                'birthCertNumber': data['birthCertNumber'],
+                'issuedDate': data['issuedDate'],
+                'created_at': datetime.now().isoformat()
+            }
+
+            print("Certificate data to be added:", certificate_data)  # Add logging to check certificate data
+
+            doc_ref = FirebaseService.db.collection('valid_certificates').add(certificate_data)
+            certificate_id_db = doc_ref[1].id
+
+            FirebaseService.db.collection('valid_certificates').document(certificate_id_db).update({'certificate_id_db': certificate_id_db})
+            
+
+            print("Certificate added successfully with ID:", certificate_id_db)  # Add logging to confirm addition
+
+            return {'message': 'Certificate added successfully', 'certificate_id_db': certificate_id_db}, 201
+        except Exception as e:
+            print("Error:", str(e))  # Add logging to capture any errors
+            raise CertificateError(str(e))
+        
+#Get valid certificates for admin
+    @staticmethod
+    def get_valid_certificates():
+        try:
+            docs = FirebaseService.db.collection('valid_certificates').stream()
+            return {'certificates': [doc.to_dict() for doc in docs]}, 200
+        except Exception as e:
+            raise CertificateError(str(e))
+        
+
+#get specifi valid certificate deails from nic or birth certificate number
+    @staticmethod
+    def get_valid_certificates_by_query(nic=None, birthCertNumber=None):
+        try:
+            query = FirebaseService.db.collection('valid_certificates')
+            
+            if nic:
+                query = query.where('nic', '==', nic)
+            elif birthCertNumber:
+                query = query.where('birthCertNumber', '==', birthCertNumber)
+            
+            docs = query.stream()
+            return {'certificates': [doc.to_dict() for doc in docs]}, 200
+        except Exception as e:
+            raise CertificateError(str(e))
+        
 #Get status of the request for users not admin
     @staticmethod
     def get_status(user):
@@ -94,10 +158,39 @@ class CertificateService:
     @staticmethod
     def get_all_pending_requests():
         try:
-            docs = FirebaseService.db.collection('certificate_requests') \
-                 \
-                .stream()
+            docs = FirebaseService.db.collection('certificate_requests').where('status', '==', 'pending').stream()
             return {'requests': [doc.to_dict() for doc in docs]}, 200
+        except Exception as e:
+            raise CertificateError(str(e))
+        
+#Get all requests for admin
+    @staticmethod
+    def get_all_requests():
+        try:
+            docs = FirebaseService.db.collection('certificate_requests').stream()
+            return {'requests': [doc.to_dict() for doc in docs]}, 200
+        except Exception as e:
+            raise CertificateError(str(e))
+        
+#Get specific request for admin
+    @staticmethod
+    def get_request(request_id):
+        try:
+            request_data = FirebaseService.db.collection('certificate_requests').document(request_id).get().to_dict()
+            return {'request': request_data}, 200
+        except Exception as e:
+            raise CertificateError(str(e))
+        
+#get specific request for users verification
+    @staticmethod
+    def get_verified_request(request_id):
+        try:
+            doc_ref = FirebaseService.db.collection('certificate_requests').document(request_id)
+            request_data = doc_ref.get().to_dict()
+            if request_data:
+                return {'requestDetails': request_data}, 200
+            else:
+                return {'message': 'Request not found'}, 404
         except Exception as e:
             raise CertificateError(str(e))
 
@@ -172,18 +265,17 @@ class CertificateService:
             raise CertificateError(str(e))
 
 #Delete request for users
-    @staticmethod
-    def delete_request(user, request_id):
-        try:
-            # Check if the user has access to the request
-            request_data = FirebaseService.db.collection('certificate_requests').document(request_id).get().to_dict()
-            if request_data['user_id'] != user['uid']:
-                raise CertificateError('You do not have permission to delete this request')
 
+    @staticmethod
+    def delete_request(request_id):
+        try:
+            print(f"Attempting to delete request {request_id}")
             # Delete the request
             FirebaseService.db.collection('certificate_requests').document(request_id).delete()
+            print(f"Request {request_id} deleted successfully")
             return {'message': 'Request deleted successfully'}, 200
         except Exception as e:
+            print(f"Error deleting request {request_id}: {str(e)}")
             raise CertificateError(str(e))
 
 #get specific certificates for users
@@ -211,5 +303,31 @@ class CertificateService:
             docs = FirebaseService.db.collection('certificates').stream()
             return {'certificates': [doc.to_dict() for doc in docs]}, 200
         except Exception as e:
+            raise CertificateError(str(e))
+        
+#Delete Released certificate
+    @staticmethod
+    def delete_certificate(certificate_id):
+        try:
+            print(f"Attempting to delete certificate {certificate_id}")
+            # Delete the certificate
+            FirebaseService.db.collection('certificates').document(certificate_id).delete()
+            print(f"Certificate {certificate_id} deleted successfully")
+            return {'message': 'Certificate deleted successfully'}, 200
+        except Exception as e:
+            print(f"Error deleting certificate {certificate_id}: {str(e)}")
+            raise CertificateError(str(e))
+        
+#delete valid certificate for admin
+    @staticmethod
+    def delete_valid_certificate(certificate_id):
+        try:
+            print(f"Attempting to delete certificate {certificate_id}")
+            # Delete the certificate
+            FirebaseService.db.collection('valid_certificates').document(certificate_id).delete()
+            print(f"Certificate {certificate_id} deleted successfully")
+            return {'message': 'Certificate deleted successfully'}, 200
+        except Exception as e:
+            print(f"Error deleting certificate {certificate_id}: {str(e)}")
             raise CertificateError(str(e))
 

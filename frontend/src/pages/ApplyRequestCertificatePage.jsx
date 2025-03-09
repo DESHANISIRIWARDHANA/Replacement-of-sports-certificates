@@ -33,11 +33,13 @@ export default function ApplyRequestCertificatePage({ volleyballImageUrl }) {
         </div>
       </div>
 
-      <div className="lg:w-1/2 flex items-center justify-center overflow-hidden">
+      <div className="lg:w-1/3 flex items-center justify-center overflow-hidden">
+        {" "}
+        {/* Adjusted width */}
         <img
           src={volleyballImageUrl}
           alt="Volleyball Player Jumping"
-          className="w-full h-full object-cover rounded-lg shadow-lg"
+          className="w-full h-auto object-cover rounded-lg shadow-lg"
           loading="lazy"
         />
       </div>

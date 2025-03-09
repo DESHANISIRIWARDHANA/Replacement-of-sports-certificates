@@ -1,34 +1,56 @@
-import React, { useState } from "react";
-import axios from "axios"; // Assuming axios is used to make API requests
+import React, { useState, useContext } from "react";
+import axios from "axios";
+import { AuthContext } from "../authContext";
+import logo from "../assets/images/logo.png";
+import back from "../assets/images/loginsc.jpg";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const { setIsAuthenticated } = useContext(AuthContext);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/login", {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        {
+          email,
+          password,
+        }
+      );
       const { token } = response.data;
       // Save token to localStorage or state for further requests
       localStorage.setItem("token", token);
+      console.log("Token saved to localStorage:", token);
+      setIsAuthenticated(true); // Update authentication state
+      console.log("Login successful, setting isAuthenticated to true");
       window.location.href = "/"; // Redirect to home after successful login
     } catch (err) {
       setError("Invalid email or password");
+      console.error("Login error:", err);
     }
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gray-100">
+    <div
+      className="min-h-screen flex justify-center items-center bg-gray-100"
+      style={{
+        backgroundImage: `url(${back})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+        <img src={logo} alt="logo" className="w-60 h-60 mb-4  mx-auto" />
         <h2 className="text-3xl font-semibold text-center mb-6">Login</h2>
         <form onSubmit={handleLogin}>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
               Email
             </label>
             <input
@@ -42,7 +64,10 @@ function LoginPage() {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
               Password
             </label>
             <input
@@ -55,7 +80,9 @@ function LoginPage() {
             />
           </div>
 
-          {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
+          {error && (
+            <p className="text-red-500 text-sm text-center mb-4">{error}</p>
+          )}
 
           <button
             type="submit"

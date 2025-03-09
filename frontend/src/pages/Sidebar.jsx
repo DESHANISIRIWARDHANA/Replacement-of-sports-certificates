@@ -1,10 +1,17 @@
 import { useState } from "react";
-import { FaUser, FaCertificate, FaFileUpload, FaCheckCircle, FaSignOutAlt, FaBars } from "react-icons/fa";
+import {
+  FaUser,
+  FaCertificate,
+  FaFileUpload,
+  FaCheckCircle,
+  FaSignOutAlt,
+  FaBars,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 export default function Sidebar({ activeTab, setActiveTab }) {
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(true); 
+  const [isOpen, setIsOpen] = useState(true);
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
@@ -15,25 +22,22 @@ export default function Sidebar({ activeTab, setActiveTab }) {
     navigate(`/${tab}`);
     switch (tab) {
       case "personalDetails":
-        navigate("/personalDetails"); 
+        navigate("/personalDetails");
         break;
       case "certificateDetails":
-        navigate("/ReplacementCertificateForm"); 
+        navigate("/ReplacementCertificateForm");
         break;
-      
+
       default:
         break;
     }
   };
 
-  
-
   return (
     <div className="h-screen flex">
-      
       <button
         onClick={toggleSidebar}
-        className="fixed top-6 left-4 z-50 bg-gray-800 text-white p-2 rounded mb-10" 
+        className="fixed top-6 left-4 z-50 bg-gray-800 text-white p-2 rounded mb-10"
       >
         <FaBars size={20} />
       </button>
@@ -43,19 +47,36 @@ export default function Sidebar({ activeTab, setActiveTab }) {
           isOpen ? "translate-x-0" : "-translate-x-full"
         } transition-transform duration-300 ease-in-out w-64 p-4 flex flex-col`}
       >
-        
-        <nav className="flex-1 mt-12"> 
+        <nav className="flex-1 mt-12">
           <ul className="space-y-2">
             {[
-              { id: "personalDetails", label: "Personal Details", icon: <FaUser /> },
-              { id: "certificateDetails", label: "Certificate Details", icon: <FaCertificate /> },
-              { id: "documentUpload", label: "Document Upload", icon: <FaFileUpload /> },
-              { id: "reviewAndSubmit", label: "Review and Submit", icon: <FaCheckCircle /> }
+              {
+                id: "personalDetails",
+                label: "Personal Details",
+                icon: <FaUser />,
+              },
+              {
+                id: "certificateDetails",
+                label: "Certificate Details",
+                icon: <FaCertificate />,
+              },
+              {
+                id: "documentUpload",
+                label: "Document Upload",
+                icon: <FaFileUpload />,
+              },
+              {
+                id: "reviewAndSubmit",
+                label: "Review and Submit",
+                icon: <FaCheckCircle />,
+              },
             ].map((item) => (
               <li
                 key={item.id}
                 className={`flex items-center p-3 cursor-pointer rounded-lg transition-colors ${
-                  activeTab === item.id ? "bg-blue-500 text-white" : "bg-white text-black hover:bg-blue-300"
+                  activeTab === item.id
+                    ? "bg-blue-500 text-white"
+                    : "bg-white text-black hover:bg-blue-300"
                 }`}
                 onClick={() => handleTabClick(item.id)}
               >

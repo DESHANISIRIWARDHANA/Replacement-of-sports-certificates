@@ -1,18 +1,21 @@
 import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import SideBar from "../../components/SideBar";
 import { NavLink } from "react-router-dom";
 
-function RequestView() {
+function RequestsView() {
   const [requests, setRequests] = useState([]);
   const [currentView, setCurrentView] = useState("pending");
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRequests = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/admin/requests",
+          "http://localhost:5000/api/admin/allrequests",
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`, // Adjust the token retrieval as needed
@@ -28,6 +31,25 @@ function RequestView() {
     fetchRequests();
   }, []);
 
+  const handleDelete = async (request_id) => {
+    try {
+      await axios.delete(
+        `http://localhost:5000/api/certificates/request/${request_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setRequests((prevRequests) =>
+        prevRequests.filter((request) => request.request_id !== request_id)
+      );
+      navigate("/admin/requestsAdmin");
+    } catch (error) {
+      console.error("Error deleting request:", error);
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case "Active Now":
@@ -39,12 +61,18 @@ function RequestView() {
   };
 
   const filteredRequests = requests.filter(
-    (request) => request.status === currentView
+    (request) =>
+      request.status === currentView &&
+      (request.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        request.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        request.reason.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        request.request_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        request.user_id.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
-    <div className="flex h-screen bg-gray-100 pt-20">
-      {/* <SideBar /> */}
+    <div className="flex h-screen bg-gray-100 pt-20 ">
+      <SideBar />
       {/* Main Content */}
       <div className="bg-[#EDF6F7] flex-1 p-8">
         <div className="bg-white flex-1 overflow-auto rounded-lg">
@@ -64,6 +92,13 @@ function RequestView() {
                   />
                   <span>Chanodya</span>
                 </div>
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="p-2 border border-gray-300 rounded"
+                />
               </div>
             </div>
           </header>
@@ -138,65 +173,110 @@ function RequestView() {
                     </tr>
                   </thead>
                   <tbody className="text-center align-middle">
-                    {filteredRequests.map((request, index) => (
-                      <tr key={index}>
-                        <td className="py-2 px-4 border-b">
-                          {request.full_name}
-                        </td>
-                        <td className="py-2 px-4 border-b">{request.email}</td>
-                        <td className="py-2 px-4 border-b">{request.reason}</td>
-                        <td className="py-2 px-4 border-b">
-                          {request.request_id}
-                        </td>
-                        <td
-                          className={`py-2 px-4 border-b ${getStatusColor(
-                            request.status
-                          )}`}
-                        >
-                          {request.status}
-                        </td>
-                        <td className="py-2 px-4 border-b">
-                          {request.user_id}
-                        </td>
-                        <td className="py-2 px-4 border-b align-middle">
-                          <div className="flex justify-center space-x-2">
-                            {currentView === "pending" && (
-                              <>
-                                {/* <button className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
-                                  Approve
-                                </button>
-                                <button className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
-                                  Reject
-                                </button> */}
-                                <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                                  View
-                                </button>
-                              </>
-                            )}
-                            {currentView === "approved" && (
-                              <>
-                                <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                                  View
-                                </button>
-                                <button className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
-                                  Delete
-                                </button>
-                              </>
-                            )}
-                            {currentView === "rejected" && (
-                              <>
-                                <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                                  View
-                                </button>
-                                <button className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
-                                  Delete
-                                </button>
-                              </>
-                            )}
-                          </div>
+                    {filteredRequests.length > 0 ? (
+                      filteredRequests.map((request, index) => (
+                        <tr key={index}>
+                          <td className="py-2 px-4 border-b">
+                            {request.full_name}
+                          </td>
+                          <td className="py-2 px-4 border-b">
+                            {request.email}
+                          </td>
+                          <td className="py-2 px-4 border-b">
+                            {request.reason}
+                          </td>
+                          <td className="py-2 px-4 border-b">
+                            {request.request_id}
+                          </td>
+                          <td
+                            className={`py-2 px-4 border-b ${getStatusColor(
+                              request.status
+                            )}`}
+                          >
+                            {request.status}
+                          </td>
+                          <td className="py-2 px-4 border-b">
+                            {request.user_id}
+                          </td>
+                          <td className="py-2 px-4 border-b align-middle">
+                            <div className="flex justify-center space-x-2">
+                              {currentView === "pending" && (
+                                <>
+                                  <button
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                                    onClick={() =>
+                                      navigate(
+                                        `/admin/requestsAdmin/${request.request_id}`
+                                      )
+                                    }
+                                  >
+                                    View
+                                  </button>
+                                  <button
+                                    className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                                    onClick={() =>
+                                      handleDelete(request.request_id)
+                                    }
+                                  >
+                                    Delete
+                                  </button>
+                                </>
+                              )}
+                              {currentView === "approved" && (
+                                <>
+                                  <button
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                                    onClick={() =>
+                                      navigate(
+                                        `/admin/requestsAdmin/${request.request_id}`
+                                      )
+                                    }
+                                  >
+                                    View
+                                  </button>
+                                  <button
+                                    className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                                    onClick={() =>
+                                      handleDelete(request.request_id)
+                                    }
+                                  >
+                                    Delete
+                                  </button>
+                                </>
+                              )}
+                              {currentView === "rejected" && (
+                                <>
+                                  <button
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                                    onClick={() =>
+                                      navigate(
+                                        `/admin/requestsAdmin/${request.request_id}`
+                                      )
+                                    }
+                                  >
+                                    View
+                                  </button>
+                                  <button
+                                    className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                                    onClick={() =>
+                                      handleDelete(request.request_id)
+                                    }
+                                  >
+                                    Delete
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="7" className="py-2 px-4 border-b">
+                          No data found
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -208,4 +288,4 @@ function RequestView() {
   );
 }
 
-export default RequestView;
+export default RequestsView;

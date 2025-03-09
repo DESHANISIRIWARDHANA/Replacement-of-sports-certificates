@@ -59,6 +59,8 @@ class FirebaseService:
             .stream()
         return [doc.to_dict() for doc in docs]
 
+
+
 #------------------------------------------------------------------------------
 
 # get user data

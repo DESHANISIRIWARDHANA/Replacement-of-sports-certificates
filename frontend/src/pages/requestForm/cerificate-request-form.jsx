@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Upload } from "lucide-react";
+import { Upload, CheckCircle } from "lucide-react";
 import axios from "axios";
 import Spinner from "../../components/Spinner";
+import formbg from "../../assets/images/form.jpg";
 
 const CertificateRequestForm = () => {
   const [loading, setLoading] = useState(false);
@@ -10,6 +11,7 @@ const CertificateRequestForm = () => {
     fullName: "",
     facultyName: "",
     studentId: "",
+    nic: "",
     dateOfBirth: "",
     address: "",
     email: "",
@@ -18,6 +20,10 @@ const CertificateRequestForm = () => {
     certificateType: "",
     dateOfIssue: "",
     reason: "",
+    meet: "",
+    ageGroup: "",
+    place: "",
+    birthCertNumber: "",
     certificate_id: null,
     prediction: null,
   });
@@ -80,19 +86,15 @@ const CertificateRequestForm = () => {
 
         if (response.data.prediction === "non-sports") {
           alert(
-            "This is not a sports certificate. Please cancel the submission."
+            "This is not a sports certificate. But You can submit for admin review."
           );
           // You can prevent the submission process or reset form here
           setActiveStep("certificate"); // Restart at certificate step
         } else if (!response.data.certificate_id_match) {
           alert("The certificate ID does not match. You can still submit.");
-          setDirectApproval(false); // Allow submission even if ID doesn't match
-        } else {
-          setDirectApproval(true); // Allow direct approval if ID matches
         }
       } catch (error) {
         console.error("Error performing OCR prediction:", error);
-        setDirectApproval(false);
         setFormData((prevState) => ({
           ...prevState,
           certificate_id: null,
@@ -105,30 +107,12 @@ const CertificateRequestForm = () => {
   };
 
   const handleSubmit = async () => {
-    // Check if OCR is still processing or not
-    if (isOCRProcessing) {
-      alert("Please wait for OCR processing to finish.");
-      return; // Stop the submission if OCR is still processing
-    }
-
-    // Now check if certificate_id and prediction are available
-    if (!formData.prediction) {
-      alert("Wait till OCR Processing done...");
-      return; // Stop the submission if any required fields are missing
-    }
-
-    setLoading(true);
-
-    // Simulate API call or long process
-    setTimeout(() => {
-      setLoading(false);
-      // Handle your form submission logic here
-    }, 2000);
     const token = localStorage.getItem("token");
     const formDataToSend = new FormData();
     formDataToSend.append("fullName", formData.fullName);
     formDataToSend.append("facultyName", formData.facultyName);
     formDataToSend.append("studentId", formData.studentId);
+    formDataToSend.append("nic", formData.nic);
     formDataToSend.append("dob", formData.dateOfBirth);
     formDataToSend.append("address", formData.address);
     formDataToSend.append("email", formData.email);
@@ -139,27 +123,57 @@ const CertificateRequestForm = () => {
     formDataToSend.append("reason", formData.reason);
     formDataToSend.append("oldDocumentCopy", uploadedFiles.certificate);
     formDataToSend.append("NIC", uploadedFiles.id);
-
-    // Only append certificate_id and prediction if a certificate is uploaded
-    if (uploadedFiles.certificate && formData.certificate_id) {
-      formDataToSend.append("certificate_id", formData.certificate_id);
-      formDataToSend.append("prediction", formData.prediction);
-    }
-
-    // Check if it's a non-sports certificate
-    if (formData.prediction === "non-sports") {
-      alert("This is not a sports certificate. You cannot submit.");
-      return;
-    }
-
-    // If certificate ID doesn't match, allow submission but notify user
-    if (!formData.certificate_id) {
-      alert(
-        "Certificate ID does not match. However, you can still submit the request."
-      );
-    }
+    formDataToSend.append("meet", formData.meet);
+    formDataToSend.append("ageGroup", formData.ageGroup);
+    formDataToSend.append("place", formData.place);
+    formDataToSend.append("birthCertNumber", formData.birthCertNumber);
+    formDataToSend.append("certificate_id", formData.certificate_id);
+    formDataToSend.append("prediction", formData.prediction);
 
     try {
+      // Fetch valid certificate data
+      const queryParam = formData.nic
+        ? `nic=${formData.nic}`
+        : `birthCertNumber=${formData.birthCertNumber}`;
+      const validCertificatesResponse = await axios.get(
+        `http://127.0.0.1:5000/api/certificates/certificate/valid/query?${queryParam}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const validCertificates = validCertificatesResponse.data.certificates;
+
+      // Compare user-entered data with valid certificate data
+      let highestMatchingPercentage = 0;
+      const totalFields = 7; // Number of fields to compare
+
+      validCertificates.forEach((validCertificate) => {
+        let matchingCount = 0;
+        if (validCertificate.certificate_id === formData.certificate_id)
+          matchingCount++;
+        if (validCertificate.name === formData.fullName) matchingCount++;
+        if (validCertificate.meet === formData.meet) matchingCount++;
+        if (validCertificate.ageGroup === formData.ageGroup) matchingCount++;
+        if (validCertificate.place === formData.place) matchingCount++;
+        if (validCertificate.birthCertNumber === formData.birthCertNumber)
+          matchingCount++;
+        if (validCertificate.eventName === formData.eventName) matchingCount++;
+        // if (validCertificate.dateIssued === formData.dateOfIssue)
+        //   matchingCount++;
+
+        const matchingPercentage = (matchingCount / totalFields) * 100;
+        if (matchingPercentage > highestMatchingPercentage) {
+          highestMatchingPercentage = matchingPercentage;
+        }
+      });
+
+      // Include the highest matching percentage in the form data
+      formDataToSend.append("matchingPercentage", highestMatchingPercentage);
+
+      // Submit the form data
       const response = await axios.post(
         "http://localhost:5000/api/certificates/request",
         formDataToSend,
@@ -170,30 +184,16 @@ const CertificateRequestForm = () => {
           },
         }
       );
+      console.log("Request submitted successfully:", response.data);
+      // Handle success (e.g., show a success message, redirect to another page, etc.)
+      alert("Request submitted successfully!");
 
-      console.log("Response from backend:", response.data);
-
-      if (directApproval) {
-        const requestId = response.data.request_id;
-        const approveResponse = await axios.post(
-          `http://localhost:5000/api/admin/approve/${requestId}`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        console.log("Request approved successfully:", approveResponse.data);
-      } else {
-        alert("The request has been submitted for admin review.");
-      }
-
-      // After successful submission, reset form state and return to the initial step
+      // Reset form data after successful submission
       setFormData({
         fullName: "",
         facultyName: "",
         studentId: "",
+        nic: "",
         dateOfBirth: "",
         address: "",
         email: "",
@@ -202,6 +202,10 @@ const CertificateRequestForm = () => {
         certificateType: "",
         dateOfIssue: "",
         reason: "",
+        meet: "",
+        ageGroup: "",
+        place: "",
+        birthCertNumber: "",
         certificate_id: null,
         prediction: null,
       });
@@ -209,11 +213,80 @@ const CertificateRequestForm = () => {
         certificate: null,
         id: null,
       });
-      setActiveStep("personal"); // Reset the step to the first one
+      setActiveStep("personal"); // Reset to the first step
     } catch (error) {
       console.error("Error submitting request:", error);
+      // Handle error (e.g., show an error message)
+      alert("Error submitting request. Please try again.");
     }
   };
+
+  const renderDocumentUpload = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold mb-6">Document Upload</h2>
+      <div>
+        <label className="block text-sm mb-2">
+          Uploading old certificate copy (if available)
+        </label>
+        <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center bg-[#f8fafc]">
+          <div className="flex flex-col items-center">
+            {uploadedFiles.certificate ? (
+              <CheckCircle className="w-6 h-6 text-green-500 mb-2" />
+            ) : (
+              <Upload className="w-6 h-6 text-gray-400 mb-2" />
+            )}
+            <span className="text-sm text-gray-500">
+              {uploadedFiles.certificate ? "File Uploaded" : "Add pdf/png"}
+            </span>
+          </div>
+          <input
+            type="file"
+            onChange={(e) => handleFileUpload(e, "certificate")}
+            accept=".png,jpg,jpeg"
+            className="hidden"
+            id="certificate-upload"
+          />
+          <label
+            htmlFor="certificate-upload"
+            className="mt-4 inline-block px-4 py-2 bg-blue-50 text-blue-600 rounded-md cursor-pointer hover:bg-blue-100"
+          >
+            Choose File
+          </label>
+        </div>
+      </div>
+      <div>
+        <label className="block text-sm mb-2">Upload ID</label>
+        <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center bg-[#f8fafc]">
+          <div className="flex flex-col items-center">
+            {uploadedFiles.id ? (
+              <CheckCircle className="w-6 h-6 text-green-500 mb-2" />
+            ) : (
+              <Upload className="w-6 h-6 text-gray-400 mb-2" />
+            )}
+            <span className="text-sm text-gray-500">
+              {uploadedFiles.id ? "File Uploaded" : "Add pdf/png"}
+            </span>
+          </div>
+          <input
+            type="file"
+            onChange={(e) => handleFileUpload(e, "id")}
+            accept=".pdf,.png"
+            className="hidden"
+            id="id-upload"
+          />
+          <label
+            htmlFor="id-upload"
+            className="mt-4 inline-block px-4 py-2 bg-blue-50 text-blue-600 rounded-md cursor-pointer hover:bg-blue-100"
+          >
+            Choose File
+          </label>
+        </div>
+        <p className="text-sm text-gray-500 mt-2">
+          Each document must be less than 3MB in size
+        </p>
+      </div>
+    </div>
+  );
 
   const renderPersonalDetails = () => (
     <div className="space-y-4">
@@ -259,6 +332,16 @@ const CertificateRequestForm = () => {
             className="w-full p-2 rounded bg-[#f8fafc] border border-gray-200"
           />
         </div>
+      </div>
+      <div>
+        <label className="block text-sm mb-2">NIC Number</label>
+        <input
+          type="text"
+          name="nic"
+          value={formData.nic}
+          onChange={handleInputChange}
+          className="w-full p-2 rounded bg-[#f8fafc] border border-gray-200"
+        />
       </div>
       <div>
         <label className="block text-sm mb-2">Address</label>
@@ -319,6 +402,50 @@ const CertificateRequestForm = () => {
         />
       </div>
       <div>
+        <label className="block text-sm mb-2">Birth Certificate Number</label>
+        <input
+          type="text"
+          name="birthCertNumber"
+          placeholder="Ex: 9475"
+          value={formData.birthCertNumber}
+          onChange={handleInputChange}
+          className="w-full p-2 rounded bg-[#f8fafc] border border-gray-200"
+        />
+      </div>
+      <div>
+        <label className="block text-sm mb-2">Meet</label>
+        <input
+          type="text"
+          name="meet"
+          value={formData.meet}
+          onChange={handleInputChange}
+          className="w-full p-2 rounded bg-[#f8fafc] border border-gray-200"
+        />
+      </div>
+      <div>
+        <label className="block text-sm mb-2">Age Group</label>
+        <input
+          type="text"
+          name="ageGroup"
+          placeholder="Ex: Under 20"
+          value={formData.ageGroup}
+          onChange={handleInputChange}
+          className="w-full p-2 rounded bg-[#f8fafc] border border-gray-200"
+        />
+      </div>
+      <div>
+        <label className="block text-sm mb-2">Place</label>
+        <input
+          type="text"
+          name="place"
+          placeholder="Ex: 2nd"
+          value={formData.place}
+          onChange={handleInputChange}
+          className="w-full p-2 rounded bg-[#f8fafc] border border-gray-200"
+        />
+      </div>
+
+      <div>
         <label className="block text-sm mb-2">Type Of Certificate</label>
         <input
           type="text"
@@ -346,61 +473,6 @@ const CertificateRequestForm = () => {
           onChange={handleInputChange}
           className="w-full p-2 rounded bg-[#f8fafc] border border-gray-200 h-24"
         />
-      </div>
-    </div>
-  );
-
-  const renderDocumentUpload = () => (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold mb-6">Document Upload</h2>
-      <div>
-        <label className="block text-sm mb-2">
-          Uploading old certificate copy (if available)
-        </label>
-        <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center bg-[#f8fafc]">
-          <div className="flex flex-col items-center">
-            <Upload className="w-6 h-6 text-gray-400 mb-2" />
-            <span className="text-sm text-gray-500">Add pdf/png</span>
-          </div>
-          <input
-            type="file"
-            onChange={(e) => handleFileUpload(e, "certificate")}
-            accept=".png,jpg,jpeg"
-            className="hidden"
-            id="certificate-upload"
-          />
-          <label
-            htmlFor="certificate-upload"
-            className="mt-4 inline-block px-4 py-2 bg-blue-50 text-blue-600 rounded-md cursor-pointer hover:bg-blue-100"
-          >
-            Choose File
-          </label>
-        </div>
-      </div>
-      <div>
-        <label className="block text-sm mb-2">Upload ID</label>
-        <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center bg-[#f8fafc]">
-          <div className="flex flex-col items-center">
-            <Upload className="w-6 h-6 text-gray-400 mb-2" />
-            <span className="text-sm text-gray-500">Add pdf/png</span>
-          </div>
-          <input
-            type="file"
-            onChange={(e) => handleFileUpload(e, "id")}
-            accept=".pdf,.png"
-            className="hidden"
-            id="id-upload"
-          />
-          <label
-            htmlFor="id-upload"
-            className="mt-4 inline-block px-4 py-2 bg-blue-50 text-blue-600 rounded-md cursor-pointer hover:bg-blue-100"
-          >
-            Choose File
-          </label>
-        </div>
-        <p className="text-sm text-gray-500 mt-2">
-          Each document must be less than 3MB in size
-        </p>
       </div>
     </div>
   );
@@ -461,6 +533,10 @@ const CertificateRequestForm = () => {
         )}
         <button
           onClick={() => {
+            if (isOCRProcessing) {
+              alert("Please wait until the OCR processing is complete.");
+              return;
+            }
             if (activeStep === "personal") setActiveStep("certificate");
             if (activeStep === "certificate") setActiveStep("upload");
             if (activeStep === "upload") setActiveStep("review");
@@ -473,8 +549,8 @@ const CertificateRequestForm = () => {
               ? "bg-blue-500 text-white hover:bg-blue-600"
               : "bg-[#40b66b] text-white hover:bg-[#40b66b]/90"
           }`}
+          disabled={isOCRProcessing}
         >
-          {/* {loading ? <Spinner /> : "Submit"} */}
           {activeStep === "review" ? "Submit" : "Next"}
         </button>
       </div>

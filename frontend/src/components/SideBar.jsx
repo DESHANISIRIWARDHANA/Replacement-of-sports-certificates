@@ -1,4 +1,4 @@
-import { Home, Award, Users, LogOut } from "lucide-react";
+import { Home, Award, Users, LogOut, ArrowRightToLine } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 function SideBar() {
@@ -8,7 +8,7 @@ function SideBar() {
       <div className="w-64 bg-[#EDF6F7] shadow-lg">
         <div className="flex flex-col h-full">
           <div className="p-4">
-            <h1 className="text-xl font-bold">Logo Here</h1>
+            {/* <h1 className="text-xl font-bold">Logo Here</h1> */}
           </div>
 
           {/* Navigation */}
@@ -22,6 +22,12 @@ function SideBar() {
                 <Award size={20} />
                 <NavLink to="/admin/certification">Certificate</NavLink>
               </button>
+              <NavLink to="/admin/requestsAdmin">
+                <button className="w-full flex items-center gap-3 px-4 py-2 text-left rounded-lg hover:bg-gray-100">
+                  <ArrowRightToLine size={20} />
+                  <span>Requests</span>
+                </button>
+              </NavLink>
               <NavLink to="/studenet-details">
                 <button className="w-full flex items-center gap-3 px-4 py-2 text-left rounded-lg hover:bg-gray-100">
                   <Users size={20} />

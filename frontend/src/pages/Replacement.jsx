@@ -1,4 +1,4 @@
-import replacementBg from '../assets/images/replacement.png'
+import replacementBg from "../assets/images/replacement.png";
 
 function Replacement() {
   return (
@@ -38,4 +38,4 @@ function Replacement() {
   );
 }
 
-export default Replacement
+export default Replacement;

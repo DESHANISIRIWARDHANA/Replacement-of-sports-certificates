@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
+import logo from "../assets/images/logo.png";
+import back from "../assets/images/loginsc.jpg";
 
 function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -24,12 +26,23 @@ function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gray-100">
+    <div
+      className="min-h-screen flex justify-center items-center bg-gray-100"
+      style={{
+        backgroundImage: `url(${back})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+        <img src={logo} alt="logo" className="w-60 h-60 mb-4  mx-auto" />
         <h2 className="text-3xl font-semibold text-center mb-6">Register</h2>
         <form onSubmit={handleRegister}>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
               Email
             </label>
             <input
@@ -43,7 +56,10 @@ function RegisterPage() {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
               Password
             </label>
             <input
@@ -57,7 +73,10 @@ function RegisterPage() {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="full_name" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="full_name"
+              className="block text-sm font-medium text-gray-700"
+            >
               Full Name
             </label>
             <input
@@ -71,7 +90,10 @@ function RegisterPage() {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="contact_number" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="contact_number"
+              className="block text-sm font-medium text-gray-700"
+            >
               Contact Number
             </label>
             <input
@@ -84,7 +106,9 @@ function RegisterPage() {
             />
           </div>
 
-          {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
+          {error && (
+            <p className="text-red-500 text-sm text-center mb-4">{error}</p>
+          )}
 
           <button
             type="submit"

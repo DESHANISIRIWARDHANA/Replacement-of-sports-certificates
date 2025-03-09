@@ -1,18 +1,25 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { FiMenu, FiX } from "react-icons/fi";
 import logo from "../assets/images/logo.png";
+import { AuthContext } from "../authContext";
 
 function Navbar() {
   const [showMenu, setShowMenu] = useState(false);
+  const { userRole } = useContext(AuthContext);
 
   const MenuLinks = [
     { id: 1, name: "HOME", link: "/" },
     { id: 2, name: "ABOUT", link: "/about" },
     { id: 3, name: "REQUEST", link: "/apply-request-certificate" },
+    { id: 4, name: "VERIFY", link: "/verify-certificate" },
     { id: 5, name: "CERTIFICATE", link: "/certificate" },
     { id: 6, name: "CONTACT", link: "/contact" },
   ];
+
+  if (userRole === "admin") {
+    MenuLinks.push({ id: 7, name: "ADMIN", link: "/admin" });
+  }
 
   return (
     <>
@@ -20,7 +27,7 @@ function Navbar() {
         <img src={logo} alt="Logo" className="w-[70px] h-[70px]" />
       </div>
 
-      <div className="mx-7 fixed w-[calc(100%-3.5rem)] z-10  bg-black text-white backdrop-blur-sm">
+      <div className="mx-7 w-[calc(100%-3.5rem)] z-10 bg-black text-white backdrop-blur-sm">
         <div className="container mx-auto py-4 px-4 flex justify-center">
           {/* Desktop Navigation */}
           <nav className="hidden sm:block">
@@ -48,7 +55,7 @@ function Navbar() {
           >
             <FiMenu />
           </button>
-          {/* Side Menu for Mobile size*/}
+          {/* Side Menu for Mobile size */}
           <div
             className={`fixed top-0 left-0 h-full w-64 bg-black shadow-lg transform ${
               showMenu ? "translate-x-0" : "-translate-x-full"

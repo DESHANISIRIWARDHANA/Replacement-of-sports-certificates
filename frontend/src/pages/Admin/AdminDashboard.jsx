@@ -23,7 +23,7 @@ function AdminDashboard() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-100 mt-15">
       <SideBar />
       {/* Main Content */}
       <div className="bg-[#EDF6F7] flex-1 p-8">

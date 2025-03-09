@@ -75,7 +75,7 @@ def generate_certificate(data):
             y_position -= line_height
 
         # Generate QR code with personal information
-        qr_data = f"Name: {data['full_name']}\nEvent: {data['event_name']}\nDate Issued: {data['date_issued']}"
+        qr_data = f"Name: {data['full_name']}\nEvent: {data['event_name']}\nDate Issued: {data['date_issued']}\nID: {data['request_id']}"
         qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
         qr.add_data(qr_data)
         qr.make(fit=True)
